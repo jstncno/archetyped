@@ -1,5 +1,7 @@
 # Archetyped
 
+[![Build Status](https://travis-ci.org/earthican/archetyped.svg?branch=master)](https://travis-ci.org/earthican/archetyped)
+
 `Archetyped` is a structure for extendable Node.js applications written in
 Typescript. Using `Archetyped`, you set up a simple configuration and tell
 `Archetyped` which extensions you want to load. Each extension registers
