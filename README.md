@@ -107,7 +107,7 @@ const appConfig: ArchetypedConfig = [
 ];
 ```
 
-The sample calculator app has a config like this:
+The sample `calculator` app has a config like this:
 
 ```typescript
 const appConfig: ArchetypedConfig = [
@@ -149,16 +149,16 @@ Inherits from `EventEmitter`.
 
 The `createApp` function returns an instance of `Archetyped`.
 
-### Event: `service` (name, service)
+### Event: `service` (name: `string`, service: `Service`)
 
 When a new service is registered, this event is emitted on the app. Name is the
 short name for the service, and service is the actual object with functions.
 
-### Event: `extension` (`ArchetypeExtension`)
+### Event: `extension` (extension: `ArchetypedExtension`)
 
 When an extension registers, this event is emitted.
 
-### Event: `ready` (app)
+### Event: `ready` (app: `Archetyped`)
 
 When all extensions are done, the `ready` event is emitted. The value is the
 `Archetyped` instance itself.
