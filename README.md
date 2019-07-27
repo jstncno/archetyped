@@ -83,7 +83,7 @@ need not actually be in npm, it can be a simple folder in the code tree.
   "version": "0.0.1",
   "main": "math.js",
   "private": true,
-  "extension": {
+  "archetypeExtension": {
     "provides": ["math"],
     "consumes": []
   }
