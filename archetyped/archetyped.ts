@@ -13,26 +13,38 @@ import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError, 
  */
 export default class Archetyped extends EventEmitter {
 
-  /** A mapping of extension names to the names of the services it provides. */
+  /**
+   * A mapping of extension names to the names of the services it provides.
+   */
   packages: {[name: string]: string[]} = {};
 
-  /** A mapping of provided services to the package it's contained in. */
+  /**
+   * A mapping of provided services to the package it's contained in.
+   */
   serviceToPackage: any = {};
 
-  /** A mapping of provided services names to its functionality. */
+  /**
+   * A mapping of provided services names to its functionality.
+   */
   services: Service = {
     hub: {
       on: this.on.bind(this),
     },
   };
 
-  /** A list of provided extension `destroy` methods. */
-  destructors: Function[] = [];
+  /**
+   * A list of provided extension `destroy` methods.
+   */
+  destroyExtensionCallbacks: Function[] = [];
 
-  /** A list of provided extension `onAppReady` methods. */
+  /**
+   * A list of provided extension `onAppReady` methods.
+   */
   appReadyExtensionCallbacks: Function[] = [];
 
-  /** A list of [[ArchetypeExtension]] configurations, sorted by dependencies. */
+  /**
+   * A list of [[ArchetypeExtension]] configurations, sorted by dependencies.
+   */
   readonly sortedExtensions: ArchetypedConfig;
 
   constructor(private readonly config: ArchetypedConfig) {
@@ -47,10 +59,10 @@ export default class Archetyped extends EventEmitter {
    * Destroys all extensions that provide destroy methods
    */
   destroy() {
-    this.destructors.forEach((destroy: Function) => {
+    this.destroyExtensionCallbacks.forEach((destroy: Function) => {
       destroy();
     });
-    this.destructors = [];
+    this.destroyExtensionCallbacks = [];
   }
 
   /**
@@ -181,6 +193,7 @@ export default class Archetyped extends EventEmitter {
         const extension = new config.class(config, imports);
         this.register(extensionName, extension);
         this.appReadyExtensionCallbacks.push(extension.onAppReady.bind(extension));
+        this.destroyExtensionCallbacks.push(extension.destroy);
       } catch (err) {
         err.extension = config;
         this.emit('error', err);
@@ -216,8 +229,6 @@ export default class Archetyped extends EventEmitter {
         this.packages[name].push(service);
         this.emit('service', service, this.services[service], extension);
       });
-      if (provided && provided.hasOwnProperty('onDestroy'))
-        this.destructors.push(provided.onDestroy);
 
       this.emit('extension', extension);
     }
