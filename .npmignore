@@ -3,4 +3,5 @@
 /demos/
 /tests/
 /demos/
+.travis.yml
 tsconfig.json
