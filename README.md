@@ -12,6 +12,14 @@ dropped into other `Archetyped` apps.
 `Archetyped` is a typed implementation of
 [Architect](https://github.com/c9/architect) written in Typescript.
 
+## Status
+
+`Archetyped` is considered to be in open beta and is still undergoing
+activate development. There may be some gaps in functionality and the
+API may chance, so it is not considered ready for production use.
+
+Use at your own risk.
+
 ## Install
 
 ```bash
