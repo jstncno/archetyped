@@ -72,6 +72,10 @@ export function resolveConfig(config: ArchetypedConfig, base?: string): Archetyp
       });
       extensionConfig.packagePath = modInfo.packagePath;
 
+      if (typeof extensionConfig.trusted === 'function' && extensionConfig.trusted.call) {
+        extensionConfig.trusted = extensionConfig.trusted();
+      }
+
       if (extensionConfig.trusted === true) {
         extensionConfig.class = require(extensionConfig.packagePath).default;
       } else {

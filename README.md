@@ -132,6 +132,13 @@ If `trusted` is `false` or unspecified (default), the extension will be
 loaded inside a sandboxed [Node VM](https://nodejs.org/api/vm.html).
 If `trusted` is set to `true`, the extension will run in the context of
 the current Node process.
+The `trusted` option can also be a function that resolves to a boolean.
+Note that this property is strictly compared to `true`, i.e. it must resolve
+to `true` and can't just be something truthy:
+
+```js
+config.trusted === true
+```
 
 The `extension` section in each extension's `package.json` is also merged
 in as a prototype to the main config. This is where `provides` and

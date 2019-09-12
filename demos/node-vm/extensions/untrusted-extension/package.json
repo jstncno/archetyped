@@ -1,0 +1,9 @@
+{
+  "name": "untrusted-extension",
+  "version": "0.0.1",
+  "main": "untrusted-extension.js",
+  "private": true,
+  "archetypeExtension": {
+    "provides": ["untrustedExtension"]
+  }
+}

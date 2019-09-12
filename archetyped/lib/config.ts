@@ -4,7 +4,7 @@ export type ExtensionConfig = {
   class?: any;//Extension;
   provides?: any[];
   consumes?: any[];
-  trusted?: boolean;
+  trusted?: boolean|Function;
   [key: string]: any;
 };
 
