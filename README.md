@@ -119,7 +119,7 @@ The sample `calculator` app has a config like this:
 
 ```typescript
 const appConfig: ArchetypedConfig = [
-  { packagePath: 'math' },
+  { packagePath: 'math', trusted: true },
   './extensions/calculator',
 ];
 ```
@@ -127,6 +127,11 @@ const appConfig: ArchetypedConfig = [
 If the only option in the config is `packagePath`, then a string can be
 used in place of the object. If you want to pass other options to the
 plugin when it's being created, you can put arbitrary properties here.
+
+If `trusted` is `false` or unspecified (default), the extension will be
+loaded inside a sandboxed [Node VM](https://nodejs.org/api/vm.html).
+If `trusted` is set to `true`, the extension will run in the context of
+the current Node process.
 
 The `extension` section in each extension's `package.json` is also merged
 in as a prototype to the main config. This is where `provides` and
