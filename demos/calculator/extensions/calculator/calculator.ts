@@ -1,4 +1,4 @@
-import { ArchetypedExtension, ExtensionConfig } from '@archetyped/lib';
+import { ArchetypedExtension, ExtensionConfig } from 'archetyped/lib';
 
 /**
  * Simple left-to-right calculator.

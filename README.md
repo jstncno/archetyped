@@ -45,7 +45,7 @@ $ npm test
 ## Extension Interface
 
 ```typescript
-import { ArchetypedExtension, ExtensionConfig } from 'archetyped';
+import { ArchetypedExtension, ExtensionConfig } from 'archetyped/lib';
 
 export default class Math extends ArchetypedExtension {
   /**
