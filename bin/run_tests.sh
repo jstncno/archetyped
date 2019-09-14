@@ -14,8 +14,9 @@ do
   copyfiles -E demos/${t}/**/*.json tests/build/
 
   # Copy new Archetyped build to test suites
-  copyfiles -E -u 1 dist/**/* tests/build/demos/${t}/node_modules/archetyped
-  copyfiles -E -u 1 dist/* tests/build/demos/${t}/node_modules/archetyped
+  copyfiles -E package.json tests/build/demos/${t}/node_modules/archetyped
+  copyfiles -E {archetyped,index}.{d.ts,js} tests/build/demos/${t}/node_modules/archetyped
+  copyfiles -E lib/* tests/build/demos/${t}/node_modules/archetyped
 
 done
 
@@ -23,4 +24,4 @@ done
 TS_NODE_TRANSPILE_ONLY=true mocha -r ts-node/register -r tsconfig-paths/register tests/**/*.spec.ts
 
 # Cleanup
-rm -rf tests/build/ dist/
+npm run clean
