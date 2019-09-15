@@ -1,9 +1,17 @@
 import { dirname, resolve } from 'path';
 import { existsSync, realpathSync } from 'fs';
+import { NodeVM } from 'vm2';
 import Archetyped from './archetyped';
-import { ArchetypedConfig, ExtensionConfig, ExtendedError } from './lib';
+import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError } from './lib';
 
-export * from './lib';
+
+interface ExtensionModuleInfo {
+  consumes: string[];
+  provides: string[];
+  packagePath: string;
+  trusted?: boolean;
+  [key: string]: any;
+}
 
 /**
  * Returns an event emitter that represents the app.
@@ -58,12 +66,32 @@ export function resolveConfig(config: ArchetypedConfig, base?: string): Archetyp
     }
     // The extension is a package on the disk.  We need to load it.
     if (!extensionConfig.class) {
-      const mod = resolveModuleSync(baseDir, extensionConfig.packagePath);
-      Object.keys(mod).forEach((key: string) => {
-        if (!extensionConfig[key]) extensionConfig[key] = mod[key] as any;
+      const modInfo = resolveModuleSync(baseDir, extensionConfig.packagePath);
+      Object.keys(modInfo).forEach((key: string) => {
+        if (!extensionConfig[key]) extensionConfig[key] = modInfo[key] as any;
       });
-      extensionConfig.packagePath = mod.packagePath;
-      extensionConfig.class = require(extensionConfig.packagePath).default;
+      extensionConfig.packagePath = modInfo.packagePath;
+
+      if (typeof extensionConfig.trusted === 'function' && extensionConfig.trusted.call) {
+        extensionConfig.trusted = extensionConfig.trusted();
+      }
+
+      if (extensionConfig.trusted === true) {
+        extensionConfig.class = require(extensionConfig.packagePath).default;
+      } else {
+        // If extension is not trusted, let's run in a VM
+        // TODO: Use common or configurable VM settings
+        const vm = new NodeVM({
+          console: 'inherit',
+          sandbox: {},
+          require: {
+            context: 'sandbox',
+            external: true,
+            builtin: ['path'],
+          }
+        });
+        extensionConfig.class = vm.require(extensionConfig.packagePath).default;
+      }
     }
   });
   return config;
@@ -73,12 +101,13 @@ export function resolveConfig(config: ArchetypedConfig, base?: string): Archetyp
  * Loads a module, getting metadata from either it's package.json or export
  * object.
  */
-function resolveModuleSync(base: string, modulePath: string) {
+function resolveModuleSync(base: string, modulePath: string): ExtensionModuleInfo {
   let packagePath;
   try {
     packagePath = resolvePackageSync(base, `${modulePath}/package.json`);
   }
   catch (err) {
+    console.error('ResolvePackage error');
     if (err.code !== 'ENOENT') throw err;
   }
   const metadata = packagePath && require(packagePath).archetypeExtension || {};
@@ -87,9 +116,12 @@ function resolveModuleSync(base: string, modulePath: string) {
   } else {
     modulePath = resolvePackageSync(base, modulePath);
   }
-  const module = require(modulePath);
-  metadata.provides = metadata.provides || module.provides || [];
-  metadata.consumes = metadata.consumes || module.consumes || [];
+  // TODO: Run in vm and get its providers and consumers
+  // const module = require(modulePath);
+  // metadata.provides = metadata.provides || module.provides || [];
+  // metadata.consumes = metadata.consumes || module.consumes || [];
+  metadata.provides = metadata.provides || [];
+  metadata.consumes = metadata.consumes || [];
   metadata.packagePath = modulePath;
   return metadata;
 }
@@ -104,6 +136,7 @@ const packagePathCache: {[packagePath: string]: any} = {};
  * This throws, make sure to wrap in try..catch
  * @param base The base path of where to check for installed modules.
  * @param packagePath The path to the package module, relative to `base`.
+ * @throws [[ExtendedError]]
  */
 function resolvePackageSync(base: string, packagePath: string) {
   const originalBase = base;
@@ -115,7 +148,7 @@ function resolvePackageSync(base: string, packagePath: string) {
     return cache[packagePath];
   }
   const err: ExtendedError = new Error(
-    `Can't find '${packagePath}' relative to '${originalBase}`);
+    `Can't find "${packagePath}" relative to "${originalBase}"`);
   err.code = 'ENOENT';
   let newPath;
   if (packagePath[0] === '.' || packagePath[0] === '/') {
@@ -131,7 +164,7 @@ function resolvePackageSync(base: string, packagePath: string) {
     }
   }
   else {
-    // Check if pacakge is installed in `node_modules` relative to `base`.
+    // Check if package is installed in `node_modules` relative to `base`.
     while (base) {
       newPath = resolve(base, 'node_modules', packagePath);
       if (existsSync(newPath)) {

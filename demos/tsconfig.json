@@ -3,5 +3,7 @@
   "include": [
     "calculator/extensions/**/*.ts",
     "calculator/node_modules/**/*.ts",
+    "node-vm/extensions/**/*.ts",
+    "node-vm/node_modules/**/*.ts",
   ]
 }
