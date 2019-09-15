@@ -11,7 +11,8 @@
     "test": "bin/run_tests.sh",
     "build:http-demo": "DIR=`pwd` && cd demos/simple-web-server && npm install && cd $DIR && tsc -p demos/simple-web-server/tsconfig.json && copyfiles demos/simple-web-server/**/*.{json,html} demos/simple-web-server/build",
     "start:http-demo": "npm run build:http-demo && node demos/simple-web-server/build/demos/simple-web-server/server.js",
-    "clean": "bin/clean.sh"
+    "clean": "bin/clean.sh",
+    "publish": "bin/publish.sh"
   },
   "engines": {
     "node": ">=6.0.0"
