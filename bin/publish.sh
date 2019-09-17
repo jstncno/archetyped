@@ -11,8 +11,7 @@ fi
 # Build project
 npm run build
 
-# Pack and publish
-npm pack
+# Publish
 npm publish
 
 # Clean project
