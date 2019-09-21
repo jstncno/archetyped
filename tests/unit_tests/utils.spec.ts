@@ -1,10 +1,6 @@
 import { expect } from 'chai';
-import { EventEmitter } from 'events';
-import { dirname, resolve } from 'path';
-import { createApp, resolveConfig } from '@archetyped/index';
-import Archetyped from '@archetyped/archetyped';
-import { ArchetypedConfig, ExtensionConfig } from '@archetyped/lib';
-import { Dependency, DependencyGraph } from '@archetyped/utils/dependency-graph';
+import { ExtensionConfig } from '@archetyped/lib';
+import { DependencyGraph } from '@archetyped/utils/dependency-graph';
 
 describe('Archetyped utilities', () => {
   let deps: ExtensionConfig[]|undefined;
