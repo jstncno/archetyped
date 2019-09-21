@@ -7,16 +7,20 @@ npm run build
 # Build test comopnents
 tsc -p tests/tsconfig.json
 
-TEST_SUITES=('calculator' 'node-vm')
+readonly REL_BASE_DIR="tests/build"
+readonly TEST_DIR="${REL_BASE_DIR}/demos"
+readonly TEST_SUITES=("tests")
 for t in "${TEST_SUITES[@]}";
 do
   # Copy Calculator and Node VM test suites package files
-  copyfiles -E demos/${t}/**/*.json tests/build/
+  copyfiles -E demos/${t}/**/*.json ${REL_BASE_DIR}
+
+  readonly TEST_SUITE_DIR="${TEST_DIR}/${t}/node_modules/archetyped"
 
   # Copy new Archetyped build to test suites
-  copyfiles -E package.json tests/build/demos/${t}/node_modules/archetyped
-  copyfiles -E {archetyped,index}.{d.ts,js} tests/build/demos/${t}/node_modules/archetyped
-  copyfiles -E lib/* tests/build/demos/${t}/node_modules/archetyped
+  copyfiles -E package.json ${TEST_SUITE_DIR}
+  copyfiles -E {archetyped,index}.{d.ts,js} ${TEST_SUITE_DIR}
+  copyfiles -E lib/* ${TEST_SUITE_DIR}
 
 done
 

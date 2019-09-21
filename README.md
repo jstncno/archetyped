@@ -36,7 +36,7 @@ $ npm run start:http-demo
 HTTP server listening on http://0.0.0.0:9000
 ```
 
-The `calculator` demo is used to run unit tests. To run:
+The `tests` demo is used to run unit tests. To run:
 
 ```bash
 $ npm test

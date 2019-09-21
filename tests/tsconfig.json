@@ -4,9 +4,7 @@
     "outDir": "./build"
   },
   "include": [
-    "../demos/calculator/extensions/**/*.ts",
-    "../demos/calculator/node_modules/**/*.ts",
-    "../demos/node-vm/extensions/**/*.ts",
-    "../demos/node-vm/node_modules/**/*.ts"
+    "../demos/tests/extensions/**/*.ts",
+    "../demos/tests/node_modules/**/*.ts"
   ]
 }
