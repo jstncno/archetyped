@@ -1,10 +1,9 @@
-import { ExtensionConfig, ExtendedError } from '@archetyped/lib';
+import { ExtendedError } from '@archetyped/lib';
+import { ExtensionDefinition } from '@archetyped/lib/config';
 
 
-export interface Dependency extends Partial<ExtensionConfig> {
+export interface Dependency extends ExtensionDefinition {
   id: number;
-  provides: string[];
-  consumes: string[];
 }
 
 
@@ -19,9 +18,9 @@ export class DependencyGraph {
   private visited: Set<string> = new Set();
   private deps: Dependency[];
   private dependencyIds: {[dependency: string]: number} = {};
-  private mapped: {[id: number]: ExtensionConfig} = {};
-  constructor(deps: ExtensionConfig[]) {
-    this.deps = deps.map((dep: ExtensionConfig, index: number) => {
+  private mapped: {[id: number]: ExtensionDefinition} = {};
+  constructor(deps: ExtensionDefinition[]) {
+    this.deps = deps.map((dep: ExtensionDefinition, index: number) => {
       const dep_ = {
         ...dep,
         consumes: [...(dep.consumes || [])],
@@ -35,7 +34,7 @@ export class DependencyGraph {
     });
   }
 
-  resolve(): ExtensionConfig[]|undefined {
+  resolve(): ExtensionDefinition[]|undefined {
     let graph = this.buildGraph();
     if (!graph) return undefined;
     for (let dep of Object.keys(this.graph)) {
@@ -80,14 +79,12 @@ export class DependencyGraph {
   /**
    * DEPRECATED
    */
-  resolveIter(config: ExtensionConfig[], lookup?: Function) {
-    let extensions: ExtensionConfig[] = config
-      .map((extensionConfig: ExtensionConfig, index: number) => {
+  resolveIter(config: ExtensionDefinition[], lookup?: Function) {
+    let extensions: Dependency[] = config
+      .map((extensionConfig: ExtensionDefinition, index: number) => {
         return {
-          packagePath: extensionConfig.packagePath,
-          provides: [...(extensionConfig.provides || [])],
-          consumes: [...(extensionConfig.consumes || [])],
-          i: index,
+          ...extensionConfig,
+          id: index,
         };
       });
 
@@ -95,12 +92,12 @@ export class DependencyGraph {
       hub: true,
     };
     let changed = true;
-    let sorted: ExtensionConfig[] = [];
+    let sorted: ExtensionDefinition[] = [];
 
     while(extensions.length && changed) {
       changed = false;
       let extensions_ =  [...extensions];
-      extensions_.forEach((extension: ExtensionConfig) => {
+      extensions_.forEach((extension: Dependency) => {
         let consumes = [...extension.consumes!];
         let resolvedAll = true;
 
@@ -126,7 +123,7 @@ export class DependencyGraph {
 
     if (extensions.length) {
       let unresolved_: {[key: string]: string[]|null} = {};
-      extensions.forEach((extensionConfig: ExtensionConfig) => {
+      extensions.forEach((extensionConfig: Dependency) => {
         delete extensionConfig.config;
         extensionConfig.consumes!.forEach((service: string) => {
           if (unresolved_[service] === null) return;

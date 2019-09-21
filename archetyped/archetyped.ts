@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { basename } from 'path';
 import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError, Service } from './lib';
 import { DependencyGraph, Dependency } from './utils/dependency-graph';
+import { ExtensionDefinition } from './lib/config';
 
 /**
  * A subclass of [[EventEmitter]] that dynamically loads
@@ -68,10 +69,10 @@ export default class Archetyped extends EventEmitter {
 
   /**
    * Checks validity of [[ExtensionConfig]]s and sorts them by dependency.
-   * @param config A list of [[ArchetypedExtension]] configurations.
+   * @param config A list of [[ExtensionConfig]].
    * @param lookup A function to check if a services has been registered.
    */
-  private checkConfig(config: ArchetypedConfig, lookup?: Function): ExtensionConfig[] {
+  private checkConfig(config: ArchetypedConfig, lookup?: Function): ExtensionDefinition[] {
     // Check for the required fields in each plugin.
     config.forEach((extension: ExtensionConfig) => {
       if (extension.checked) return;
@@ -91,12 +92,11 @@ export default class Archetyped extends EventEmitter {
   }
 
   /**
-   * TODO: Create better types so we don't have to do so many tranformations.
    * Ensure there are no cyclic dependencies among extensions.
    * @param config A list of [[ExtensionConfig]].
    * @param lookup A function to check if a services has been registered.
    */
-  private checkCycles(config: ArchetypedConfig, lookup?: Function): ExtensionConfig[] {
+  private checkCycles(config: ArchetypedConfig, lookup?: Function): ExtensionDefinition[] {
     const graph = new DependencyGraph([...config]);
     const sorted = graph.resolve();
     if (!sorted) {
