@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { basename } from 'path';
 import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError, Service } from './lib';
+import { DependencyGraph, Dependency } from './utils/dependency-graph';
 
 /**
  * A subclass of [[EventEmitter]] that dynamically loads
@@ -90,85 +91,18 @@ export default class Archetyped extends EventEmitter {
   }
 
   /**
+   * TODO: Create better types so we don't have to do so many tranformations.
    * Ensure there are no cyclic dependencies among extensions.
-   * @param config A list of [[ArchetypedExtension]] configurations.
+   * @param config A list of [[ExtensionConfig]].
    * @param lookup A function to check if a services has been registered.
    */
   private checkCycles(config: ArchetypedConfig, lookup?: Function): ExtensionConfig[] {
-    let extensions: ExtensionConfig[] = [];
-    config.forEach((extensionConfig: ExtensionConfig, index: number) => {
-      extensions.push({
-        packagePath: extensionConfig.packagePath,
-        provides: Object.assign([], extensionConfig.provides || []),
-        consumes: Object.assign([], extensionConfig.consumes || []),
-        i: index,
-      });
-    });
-
-    let resolved: any = {
-      hub: true,
-    };
-    let changed = true;
-    let sorted: ExtensionConfig[] = [];
-
-    while(extensions.length && changed) {
-      changed = false;
-      let extensions_ = Object.assign([], extensions);
-      extensions_.forEach((extension: ExtensionConfig) => {
-        let consumes = Object.assign([], extension.consumes);
-        let resolvedAll = true;
-
-        consumes.forEach((service: string) => {
-          if (!resolved[service] && (!lookup || !lookup(service))) {
-            resolvedAll = false;
-          } else {
-            extension.consumes!.splice(extension.consumes!.indexOf(service), 1);
-          }
-        });
-
-        if (!resolvedAll) return;
-
-        extensions.splice(extensions.indexOf(extension), 1);
-        extension.provides!.forEach((service: string) => {
-          resolved[service] = true;
-        });
-        sorted.push(config[extension.i]);
-        changed = true;
-      });
+    const graph = new DependencyGraph([...config]);
+    const sorted = graph.resolve();
+    if (!sorted) {
+      console.error('Error resolving dependency graph');
+      return [];
     }
-
-    if (extensions.length) {
-      let unresolved_: {[key: string]: string[]|null} = {};
-      extensions.forEach((extensionConfig: ExtensionConfig) => {
-        delete extensionConfig.config;
-        extensionConfig.consumes!.forEach((service: string) => {
-          if (unresolved_[service] === null) return;
-          if (!unresolved_[service]) unresolved_[service] = [];
-          unresolved_[service]!.push(extensionConfig.packagePath);
-        });
-        extensionConfig.provides!.forEach((service: string) => {
-          unresolved_[service] = null;
-        });
-      });
-
-      let unresolved: {[key: string]: string[]} = Object.keys(unresolved_)
-        .filter((service: string) => unresolved_[service] !== null)
-        .reduce((prev: {[key: string]: string[]}, service: string) => {
-          prev[service] = unresolved_[service]!;
-          return prev;
-        }, {});
-
-      let unresolvedList = Object.keys(unresolved);
-      let resolvedList = Object.keys(resolved);
-      let err: ExtendedError = new Error(`Could not resolve dependencies\n`
-        + (unresolvedList.length ? `Missing services: ${unresolvedList}`
-        : 'Config contains cyclic dependencies' // TODO print cycles
-        ));
-      err.unresolved = unresolvedList;
-      err.resolved = resolvedList;
-      throw err;
-    }
-
     return sorted;
   }
 
