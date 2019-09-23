@@ -10,7 +10,7 @@ describe('Archetyped', () => {
   let basePath: string;
 
   before(() => {
-    basePath = resolve(dirname(__dirname), 'build', 'demos', 'calculator');
+    basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
     appConfig = resolveConfig([
       {packagePath: './extensions/calculator'},
       {packagePath: 'math'},

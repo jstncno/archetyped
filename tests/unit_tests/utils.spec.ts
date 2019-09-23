@@ -1,9 +1,10 @@
 import { expect } from 'chai';
 import { ExtensionConfig } from '@archetyped/lib';
 import { DependencyGraph } from '@archetyped/utils/dependency-graph';
+import { ExtensionDefinition } from '@archetyped/lib/config';
 
 describe('Archetyped utilities', () => {
-  let deps: ExtensionConfig[]|undefined;
+  let deps: ExtensionDefinition[]|undefined;
   let graph: DependencyGraph|undefined;
 
   afterEach(() => {
@@ -21,7 +22,7 @@ describe('Archetyped utilities', () => {
     deps = [
       {consumes: [], provides: ['A']},
       {consumes: ['A'], provides: ['B']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     expect(graph.resolve()).to.be.ok;
   });
@@ -30,9 +31,15 @@ describe('Archetyped utilities', () => {
     deps = [
       {consumes: ['B'], provides: ['A']},
       {consumes: ['A'], provides: ['B']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     expect(graph.resolve()).to.not.be.ok;
+  });
+
+  it('should resolve with empty deps', () => {
+    deps = [] as ExtensionDefinition[];
+    graph = new DependencyGraph(deps);
+    expect(graph.resolve()).to.be.ok;
   });
 
   it('should resolve a slightly more complex case', () => {
@@ -41,7 +48,7 @@ describe('Archetyped utilities', () => {
       {consumes: ['A', 'C'], provides: ['B']},
       {consumes: ['A'], provides: ['C']},
       {consumes: ['B'], provides: ['D']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     expect(graph.resolve()).to.be.ok;
   });
@@ -52,7 +59,7 @@ describe('Archetyped utilities', () => {
       {consumes: ['A', 'C'], provides: ['B']},
       {consumes: ['A', 'D'], provides: ['C']},
       {consumes: ['B'], provides: ['D']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     expect(graph.resolve()).to.not.be.ok;
   });
@@ -63,7 +70,7 @@ describe('Archetyped utilities', () => {
       {consumes: ['A', 'C'], provides: ['B']},
       {consumes: ['A'], provides: ['C']},
       {consumes: ['A'], provides: ['B']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     expect(graph.resolve()).to.not.be.ok;
   });
@@ -76,7 +83,7 @@ describe('Archetyped utilities', () => {
       {consumes: ['A', 'B'], provides: ['D']},
       {consumes: ['A', 'D'], provides: ['E']},
       {consumes: ['B'], provides: ['F']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     const orderedDepIds = graph.resolve()!.map(dep => dep.id);
     expect(orderedDepIds).to.have.ordered
@@ -91,7 +98,7 @@ describe('Archetyped utilities', () => {
       {consumes: ['A', 'B'], provides: ['D']},
       {consumes: ['A', 'D'], provides: ['E']},
       {consumes: ['E'], provides: ['F']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     const orderedDepIds = graph.resolve()!.map(dep => dep.id);
     expect(orderedDepIds).to.have.ordered
@@ -106,7 +113,7 @@ describe('Archetyped utilities', () => {
       {consumes: ['A', 'B'], provides: ['D', 'X']},
       {consumes: ['A', 'D'], provides: ['E']},
       {consumes: ['E'], provides: ['F']},
-    ] as ExtensionConfig[];
+    ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
     const orderedDepIds = graph.resolve()!.map(dep => dep.id);
     expect(orderedDepIds).to.have.ordered

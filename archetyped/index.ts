@@ -3,15 +3,8 @@ import { existsSync, realpathSync } from 'fs';
 import { NodeVM } from 'vm2';
 import Archetyped from './archetyped';
 import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError } from './lib';
+import { ExtensionDefinition, ExtensionModuleDefinition } from './lib/config';
 
-
-interface ExtensionModuleInfo {
-  consumes: string[];
-  provides: string[];
-  packagePath: string;
-  trusted?: boolean;
-  [key: string]: any;
-}
 
 /**
  * Returns an event emitter that represents the app.
@@ -57,51 +50,62 @@ export function createApp(config: ArchetypedConfig, callback?: (err?: Error, app
  * @returns An instance of [[ArchetypedConfig]] that contains module data
  *   of [[ArchetypedExtension]]s.
  */
-export function resolveConfig(config: ArchetypedConfig, base?: string): ArchetypedConfig {
+export function resolveConfig(config: ExtensionConfig[], base?: string): ArchetypedConfig {
   const baseDir = base ? base : __dirname;
-  config.forEach((extensionConfig: ExtensionConfig, index: number) => {
+  return config.map((ext: ExtensionConfig, index: number) => {
     // Shortcut where string is used for extension without any options.
-    if (typeof extensionConfig === 'string') {
-      extensionConfig = config[index] = {packagePath: extensionConfig};
+    if (typeof ext === 'string') {
+      ext = config[index] = {packagePath: ext};
     }
     // The extension is a package on the disk.  We need to load it.
-    if (!extensionConfig.class) {
-      const modInfo = resolveModuleSync(baseDir, extensionConfig.packagePath);
-      Object.keys(modInfo).forEach((key: string) => {
-        if (!extensionConfig[key]) extensionConfig[key] = modInfo[key] as any;
-      });
-      extensionConfig.packagePath = modInfo.packagePath;
+    const modDef: ExtensionModuleDefinition = resolveModuleSync(
+      baseDir, ext.packagePath);
+    // Allow default extension configs in the module definition
+    Object.keys(modDef).forEach((key: string) => {
+      if (!ext[key]) ext[key] = modDef[key] as any;
+    });
 
-      if (typeof extensionConfig.trusted === 'function' && extensionConfig.trusted.call) {
-        extensionConfig.trusted = extensionConfig.trusted();
-      }
-
-      if (extensionConfig.trusted === true) {
-        extensionConfig.class = require(extensionConfig.packagePath).default;
-      } else {
-        // If extension is not trusted, let's run in a VM
-        // TODO: Use common or configurable VM settings
-        const vm = new NodeVM({
-          console: 'inherit',
-          sandbox: {},
-          require: {
-            context: 'sandbox',
-            external: true,
-            builtin: ['path'],
-          }
-        });
-        extensionConfig.class = vm.require(extensionConfig.packagePath).default;
-      }
+    const {resolvedPath} = modDef;
+    let {trusted} = ext;
+    if (typeof ext.trusted === 'function' && ext.trusted.call) {
+      trusted = ext.trusted();
     }
+
+    let cls: ArchetypedExtension;
+    if (trusted === true) {
+      cls = require(resolvedPath).default;
+    } else {
+      // If extension is not trusted, let's run in a VM
+      // TODO: Use common or configurable VM settings
+      const vm = new NodeVM({
+        console: 'inherit',
+        sandbox: {},
+        require: {
+          context: 'sandbox',
+          external: true,
+          builtin: ['path'],
+        }
+      });
+      cls = vm.require(resolvedPath).default;
+    }
+
+    return {
+      ...modDef,
+      ...ext,
+      provides: [...modDef.provides],
+      consumes: [...modDef.consumes],
+      trusted,
+      class: cls,
+      checked: false,
+    };
   });
-  return config;
 }
 
 /**
  * Loads a module, getting metadata from either it's package.json or export
  * object.
  */
-function resolveModuleSync(base: string, modulePath: string): ExtensionModuleInfo {
+function resolveModuleSync(base: string, modulePath: string): ExtensionModuleDefinition {
   let packagePath;
   try {
     packagePath = resolvePackageSync(base, `${modulePath}/package.json`);
@@ -110,20 +114,31 @@ function resolveModuleSync(base: string, modulePath: string): ExtensionModuleInf
     console.error('ResolvePackage error');
     if (err.code !== 'ENOENT') throw err;
   }
-  const metadata = packagePath && require(packagePath).archetypeExtension || {};
+  const modDef: ExtensionModuleDefinition =
+    (packagePath && require(packagePath).archetypeExtension) || {};
+
+  let resolvedPath: string;
   if (packagePath) {
-    modulePath = dirname(packagePath);
+    resolvedPath = dirname(packagePath);
   } else {
-    modulePath = resolvePackageSync(base, modulePath);
+    resolvedPath = resolvePackageSync(base, modulePath);
   }
+
+  const ext: ExtensionModuleDefinition = {
+    // Defaults
+    consumes: [],
+    provides: [],
+    // Module specified overrides
+    ...modDef,
+    // Not allowed to modify
+    resolvedPath,
+    packagePath: modulePath,
+  };
   // TODO: Run in vm and get its providers and consumers
   // const module = require(modulePath);
-  // metadata.provides = metadata.provides || module.provides || [];
-  // metadata.consumes = metadata.consumes || module.consumes || [];
-  metadata.provides = metadata.provides || [];
-  metadata.consumes = metadata.consumes || [];
-  metadata.packagePath = modulePath;
-  return metadata;
+  // ext.provides = ext.provides || module.provides || [];
+  // ext.consumes = ext.consumes || module.consumes || [];
+  return ext;
 }
 
 /** A cache of loaded package modules. */
@@ -138,7 +153,7 @@ const packagePathCache: {[packagePath: string]: any} = {};
  * @param packagePath The path to the package module, relative to `base`.
  * @throws [[ExtendedError]]
  */
-function resolvePackageSync(base: string, packagePath: string) {
+function resolvePackageSync(base: string, packagePath: string): string {
   const originalBase = base;
   if (!(base in packagePathCache)) {
     packagePathCache[base] = {};

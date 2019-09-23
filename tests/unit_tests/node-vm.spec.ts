@@ -10,7 +10,7 @@ describe('Node VM', () => {
   let basePath: string;
 
   before(() => {
-    basePath = resolve(dirname(__dirname), 'build', 'demos', 'node-vm');
+    basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
   });
 
   it('should create an instance of Archetyped with a trusted extension' , () => {
