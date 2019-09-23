@@ -157,6 +157,10 @@ export class DependencyGraph {
   }
 
   private resolveRecur(item: string): boolean {
+    if (!this.graph[item]) {
+      console.error(`Provider for ${item} not found in dependency tree!`);
+      return false;
+    }
     if (this.resolved.has(item)) return true;
     this.visited.add(item);
     const dependencies = [...this.graph[item]];

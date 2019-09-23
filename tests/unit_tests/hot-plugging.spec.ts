@@ -12,7 +12,6 @@ describe('Archetyped Hot Plugging', () => {
   before(() => {
     basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
     appConfig = resolveConfig([
-      // {packagePath: './extensions/calculator'},
       {packagePath: 'math'},
     ], basePath);
   });
@@ -32,7 +31,6 @@ describe('Archetyped Hot Plugging', () => {
       expect(math).to.be.ok;
       app!.removeAllListeners();
 
-
       const newConfig = resolveConfig([
         {packagePath: './extensions/calculator'},
       ], basePath);
@@ -43,4 +41,22 @@ describe('Archetyped Hot Plugging', () => {
       app!.load(newConfig);
     });
   });
+
+  it('should not load an extension if its dependencies aren\'t met', () => {
+    const app = createApp([]);
+    app!.on('ready', () => {
+      app!.removeAllListeners();
+
+      const newConfig = resolveConfig([
+        {packagePath: './extensions/calculator'},
+      ], basePath);
+      app!.on('ready', () => {
+        const calculator = app!.services.calculator;
+        expect(calculator).to.be.undefined;
+        expect(app!.extensions.length).to.equal(0);
+      });
+      app!.load(newConfig);
+    });
+  });
+
 });

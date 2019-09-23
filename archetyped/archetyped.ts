@@ -65,7 +65,7 @@ export default class Archetyped extends EventEmitter {
   }
 
   /**
-   * Hot-loads a new set of extensions
+   * Hot-plugs a new set of extensions
    */
   load(extensions: ArchetypedConfig) {
     const sorted: ArchetypedConfig = [...this.config, ...extensions];
