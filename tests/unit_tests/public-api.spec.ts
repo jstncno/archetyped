@@ -26,8 +26,8 @@ describe('Archetyped Public API', () => {
   });
 
   it('should create and sort extension configs' , () => {
-    expect(app!.sortedExtensions).to.be.not.empty;
-    const [ math, calculator ] = app!.sortedExtensions;
+    expect(app!.extensions).to.be.not.empty;
+    const [ math, calculator ] = app!.extensions;
     expect(basename(math.packagePath)).to.be.equal('math');
     expect(basename(calculator.packagePath)).to.be.equal('calculator');
   });

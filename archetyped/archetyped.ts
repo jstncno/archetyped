@@ -47,7 +47,14 @@ export default class Archetyped extends EventEmitter {
   /**
    * A list of [[ArchetypeExtension]] configurations, sorted by dependencies.
    */
-  readonly sortedExtensions: ArchetypedConfig;
+  get extensions(): ArchetypedConfig {
+    return this.sortedExtensions;
+  }
+
+  /**
+   * A list of [[ArchetypeExtension]] configurations, sorted by dependencies.
+   */
+  private sortedExtensions: ArchetypedConfig;
 
   constructor(private readonly config: ArchetypedConfig) {
     super();
@@ -55,6 +62,15 @@ export default class Archetyped extends EventEmitter {
 
     // Give createApp some time to subscribe to our "ready" event
     (typeof process === "object" ? process.nextTick : setTimeout)(this.loadExtensions.bind(this));
+  }
+
+  /**
+   * Hot-loads a new set of extensions
+   */
+  load(extensions: ArchetypedConfig) {
+    const sorted: ArchetypedConfig = [...this.config, ...extensions];
+    this.sortedExtensions = this.checkConfig(sorted);
+    this.loadExtensions();
   }
 
   /**
