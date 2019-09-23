@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Run tests
-VALID="$(npm test | grep -o 'failing')"
+# Exit when any command fails
+set -e
 
-if [[ $VALID = "failing" ]]; then
-  echo "ERROR: Cannot publish if tests are failing"
-  exit 1
-fi
+# Run tests
+npm test
 
 # Build project
 npm run build

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit when any command fails
+set -e
+
 # Clean and build new project
 npm run clean
 npm run build
