@@ -56,4 +56,15 @@ describe('Archetyped', () => {
       }
     });
   });
+
+  it('should raise error for failed dependecy resolution', () => {
+    const config = resolveConfig([
+      {packagePath: './extensions/calculator'},
+    ], basePath);
+    const app = createApp(config, (err, app?) => {
+      expect(err).to.not.be.undefined;
+      expect(app).to.not.be.ok;
+    });
+    expect(app).to.not.be.ok;
+  });
 });

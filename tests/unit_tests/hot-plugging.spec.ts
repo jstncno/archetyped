@@ -47,6 +47,10 @@ describe('Archetyped Hot Plugging', () => {
     app!.on('ready', () => {
       app!.removeAllListeners();
 
+      app!.on('error', (event: {error?: string, [key: string]: any}) => {
+        expect(event.extensions.length).to.equal(0);
+      });
+
       const newConfig = resolveConfig([
         {packagePath: './extensions/calculator'},
       ], basePath);

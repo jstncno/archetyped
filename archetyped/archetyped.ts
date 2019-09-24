@@ -37,12 +37,12 @@ export default class Archetyped extends EventEmitter {
   /**
    * A list of provided extension `destroy` methods.
    */
-  destroyExtensionCallbacks: Function[] = [];
+  private destroyExtensionCallbacks: Function[] = [];
 
   /**
    * A list of provided extension `onAppReady` methods.
    */
-  appReadyExtensionCallbacks: Function[] = [];
+  private appReadyExtensionCallbacks: Function[] = [];
 
   /**
    * A list of [[ArchetypeExtension]] configurations, sorted by dependencies.
@@ -114,9 +114,16 @@ export default class Archetyped extends EventEmitter {
    */
   private checkCycles(config: ArchetypedConfig, lookup?: Function): ExtensionDefinition[] {
     const graph = new DependencyGraph([...config]);
-    const sorted = graph.resolve();
+    const result = graph.resolve();
+    if (result.error) {
+      this.emit('error', result);
+      return [];
+    }
+    const sorted = result.extensions;
     if (!sorted) {
-      console.error('Error resolving dependency graph');
+      const err = 'Error resolving dependency graph';
+      console.error(err);
+      this.emit('error', {extensions: [], error: err});
       return [];
     }
     return sorted;

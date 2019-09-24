@@ -7,6 +7,12 @@ export interface Dependency extends ExtensionDefinition {
 }
 
 
+export interface GraphResolution {
+  resolved: boolean;
+  message?: string;
+}
+
+
 export class DependencyGraph {
   /**
    * A graph represented as an adjacency map.
@@ -34,15 +40,19 @@ export class DependencyGraph {
     });
   }
 
-  resolve(): ExtensionDefinition[]|undefined {
-    let graph = this.buildGraph();
-    if (!graph) return undefined;
+  resolve(): {extensions: ExtensionDefinition[], error?: string} {
+    const graphResult = this.buildGraph();
+    if (!graphResult.resolved) {
+      console.error(graphResult.message);
+      return {extensions: [], error: graphResult.message};
+    }
     for (let dep of Object.keys(this.graph)) {
       if (this.resolved.has(dep)) {
         continue;
       }
-      const resolved = this.resolveRecur(dep);
-      if (!resolved) return undefined;
+      const result = this.resolveRecur(dep);
+      if (!result.resolved)
+        return {extensions: [], error: result.message};
     }
     const orderedIds: Set<number> = Array.from(this.resolved)
       .reduce((prev, curr) => {
@@ -50,24 +60,25 @@ export class DependencyGraph {
         return prev;
       }, new Set<number>());
     const sorted = Array.from(orderedIds).map(id => this.mapped[id]);
-    return sorted;
+    return {extensions: sorted};
   }
 
-  buildGraph(): {[key: string]: string[]}|undefined {
+  buildGraph(): GraphResolution {
     this.clear();
     for (let dep of this.deps) {
       for (let provided of dep.provides!) {
         // Fail if duplicate
         if (provided in this.graph) {
-          console.error(`Duplicate extension provided for "${provided}"`);
-          return;
+          const err = `Duplicate extension provided for "${provided}"`;
+          console.error(err);
+          return {resolved: false, message: err};
         }
         this.graph[provided] = [...dep.consumes!];
         // Resolve if there no dependencies
         if (dep.consumes!.length == 0) this.resolved.add(provided);
       }
     }
-    return {...this.graph};
+    return {resolved: true};
   }
 
   clear() {
@@ -156,30 +167,37 @@ export class DependencyGraph {
     return sorted;
   }
 
-  private resolveRecur(item: string): boolean {
+  private resolveRecur(item: string): GraphResolution {
     if (!this.graph[item]) {
-      console.error(`Provider for ${item} not found in dependency tree!`);
-      return false;
+      const err = `Provider for ${item} not found in dependency tree!`;
+      console.error(err);
+      return {resolved: false, message: err};
     }
-    if (this.resolved.has(item)) return true;
+    if (this.resolved.has(item)) return {resolved: true};
     this.visited.add(item);
     const dependencies = [...this.graph[item]];
     if (dependencies.length == 0) {
-      if (this.resolved.has(item)) return false;
+      if (this.resolved.has(item)) {
+        const err = `Duplicate provider found for ${item}`;
+        return {resolved: false, message: err};
+      }
       this.visited.delete(item);
       this.resolved.add(item);
-      return true;
+      return {resolved: true};
     }
     // Depth-First Search
     for (let dep of dependencies) {
       if (this.visited.has(dep)) {
         // Circular dependency
-        return false;
+        const err = `Circular dependency found for ${item}`;
+        console.error(err);
+        return {resolved: false, message: err};
       }
-      if (!this.resolveRecur(dep)) return false;
+      const resolved = this.resolveRecur(dep);
+      if (!resolved.resolved) return resolved;
     }
     this.visited.delete(item);
     this.resolved.add(item);
-    return true;
+    return {resolved: true};
   }
 }

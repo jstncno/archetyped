@@ -33,7 +33,9 @@ describe('Archetyped utilities', () => {
       {consumes: ['A'], provides: ['B']},
     ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
-    expect(graph.resolve()).to.not.be.ok;
+    const result = graph.resolve();
+    expect(result.error).to.not.be.undefined;
+    expect(result.extensions.length).to.equal(0);
   });
 
   it('should resolve with empty deps', () => {
@@ -61,7 +63,9 @@ describe('Archetyped utilities', () => {
       {consumes: ['B'], provides: ['D']},
     ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
-    expect(graph.resolve()).to.not.be.ok;
+    const result = graph.resolve();
+    expect(result.error).to.not.be.undefined;
+    expect(result.extensions.length).to.equal(0);
   });
 
   it('should reject a duplicate provider', () => {
@@ -72,7 +76,9 @@ describe('Archetyped utilities', () => {
       {consumes: ['A'], provides: ['B']},
     ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
-    expect(graph.resolve()).to.not.be.ok;
+    const result = graph.resolve();
+    expect(result.error).to.not.be.undefined;
+    expect(result.extensions.length).to.equal(0);
   });
 
   it('should return an ordered set of dependencies', () => {
@@ -85,7 +91,8 @@ describe('Archetyped utilities', () => {
       {consumes: ['B'], provides: ['F']},
     ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
-    const orderedDepIds = graph.resolve()!.map(dep => dep.id);
+    const result = graph.resolve();
+    const orderedDepIds = result.extensions.map(dep => dep.id);
     expect(orderedDepIds).to.have.ordered
       .members([0, 1, 3, 5, 2, 4]);
   });
@@ -100,7 +107,8 @@ describe('Archetyped utilities', () => {
       {consumes: ['E'], provides: ['F']},
     ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
-    const orderedDepIds = graph.resolve()!.map(dep => dep.id);
+    const result = graph.resolve();
+    const orderedDepIds = result.extensions.map(dep => dep.id);
     expect(orderedDepIds).to.have.ordered
       .members([0, 2, 3, 4, 5, 1]);
   });
@@ -115,7 +123,8 @@ describe('Archetyped utilities', () => {
       {consumes: ['E'], provides: ['F']},
     ] as ExtensionDefinition[];
     graph = new DependencyGraph(deps);
-    const orderedDepIds = graph.resolve()!.map(dep => dep.id);
+    const result = graph.resolve();
+    const orderedDepIds = result.extensions.map(dep => dep.id);
     expect(orderedDepIds).to.have.ordered
       .members([0, 2, 3, 4, 5, 1]);
   });
