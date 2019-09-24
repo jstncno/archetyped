@@ -6,5 +6,13 @@
   "archetypedExtension": {
     "consumes": ["math"],
     "provides": ["calculator"]
+  },
+  "custom": {
+    "package": {
+      "key": {
+        "consumes": ["math"],
+        "provides": ["calculator"]
+      }
+    }
   }
 }
