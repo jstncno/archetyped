@@ -3,7 +3,7 @@ import { existsSync, realpathSync } from 'fs';
 import { NodeVM } from 'vm2';
 import Archetyped from './archetyped';
 import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError } from './lib';
-import { ExtensionDefinition, ExtensionModuleDefinition } from './lib/config';
+import { ExtensionDefinition, ExtensionModuleDefinition, ExtensionManifest } from './lib/config';
 
 
 /**
@@ -51,16 +51,18 @@ export function createApp(config: ArchetypedConfig, callback?: (err?: Error, app
  *   of [[ArchetypedExtension]]s.
  */
 export function resolveConfig(config: ExtensionConfig[], base?: string): ArchetypedConfig {
-  const baseDir = base ? base : __dirname;
+  const basePath = base ? base : __dirname;
   return config.map((ext: ExtensionConfig, index: number) => {
     // Shortcut where string is used for extension without any options.
     if (typeof ext === 'string') {
       ext = config[index] = {packagePath: ext};
     }
+    // The package.json key that defines the extension manifest
+    const key = ext.key ? ext.key : 'archetypedExtension';
     // The extension is a package on the disk.  We need to load it.
     const modDef: ExtensionModuleDefinition = resolveModuleSync(
-      baseDir, ext.packagePath);
-    // Allow default extension configs in the module definition
+      basePath, ext.packagePath, key);
+    // Allow default extension configs in the manifest
     Object.keys(modDef).forEach((key: string) => {
       if (!ext[key]) ext[key] = modDef[key] as any;
     });
@@ -105,7 +107,7 @@ export function resolveConfig(config: ExtensionConfig[], base?: string): Archety
  * Loads a module, getting metadata from either it's package.json or export
  * object.
  */
-function resolveModuleSync(base: string, modulePath: string): ExtensionModuleDefinition {
+function resolveModuleSync(base: string, modulePath: string, key: string = 'archetypedExtension'): ExtensionModuleDefinition {
   let packagePath;
   try {
     packagePath = resolvePackageSync(base, `${modulePath}/package.json`);
@@ -114,8 +116,15 @@ function resolveModuleSync(base: string, modulePath: string): ExtensionModuleDef
     console.error('ResolvePackage error');
     if (err.code !== 'ENOENT') throw err;
   }
-  const modDef: ExtensionModuleDefinition =
-    (packagePath && require(packagePath).archetypeExtension) || {};
+
+  let manifest = (packagePath && require(packagePath)) || {};
+  for (const k of key.split('.')) {
+    if (!manifest[k]) {
+      manifest = {};
+      break;
+    }
+    manifest = manifest[k];
+  }
 
   let resolvedPath: string;
   if (packagePath) {
@@ -129,7 +138,7 @@ function resolveModuleSync(base: string, modulePath: string): ExtensionModuleDef
     consumes: [],
     provides: [],
     // Module specified overrides
-    ...modDef,
+    ...manifest,
     // Not allowed to modify
     resolvedPath,
     packagePath: modulePath,

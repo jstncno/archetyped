@@ -3,13 +3,17 @@ import { ArchetypedExtension } from './extension';
 export interface ExtensionConfig {
   packagePath: string;
   trusted?: boolean|Function;
+  key?: string;
   [key: string]: any;
 }
 
-export interface ExtensionModuleDefinition extends ExtensionConfig {
-  resolvedPath: string;
+export interface ExtensionManifest extends ExtensionConfig {
   consumes: string[];
   provides: string[];
+}
+
+export interface ExtensionModuleDefinition extends ExtensionManifest {
+  resolvedPath: string;
 }
 
 export interface ExtensionDefinition extends ExtensionModuleDefinition {
