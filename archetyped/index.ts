@@ -1,9 +1,9 @@
-import { dirname, resolve } from 'path';
+import { dirname, join, resolve } from 'path';
 import { existsSync, realpathSync } from 'fs';
 import { NodeVM } from 'vm2';
 import Archetyped from './archetyped';
 import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError } from './lib';
-import { ExtensionDefinition, ExtensionModuleDefinition, ExtensionManifest } from './lib/config';
+import { ExtensionModuleDefinition, ExtensionManifest } from './lib/config';
 
 
 /**
@@ -175,9 +175,10 @@ function resolvePackageSync(base: string, packagePath: string): string {
     `Can't find "${packagePath}" relative to "${originalBase}"`);
   err.code = 'ENOENT';
   let newPath;
-  if (packagePath[0] === '.' || packagePath[0] === '/') {
+  if (packagePath.startsWith('./') || packagePath.startsWith('/')) {
     // If `packagePath` is relative to `base`
-    newPath = resolve(base, packagePath);
+    if (packagePath.startsWith('/')) packagePath = '.' + packagePath;
+    newPath = resolve(join(base, packagePath));
     if (!existsSync(newPath)) {
       newPath = `${newPath}.js`;
     }
