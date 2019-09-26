@@ -50,13 +50,13 @@ export function createApp(config: ArchetypedConfig, callback?: (err?: Error, app
  * @returns An instance of [[ArchetypedConfig]] that contains module data
  *   of [[ArchetypedExtension]]s.
  */
-export function resolveConfig(config: ExtensionConfig[], base?: string): ArchetypedConfig {
+export function resolveConfig(config: (ExtensionConfig|string)[], base?: string): ArchetypedConfig {
   const basePath = base ? base : __dirname;
-  return config.map((ext: ExtensionConfig, index: number) => {
+  return config.map((ext_: ExtensionConfig|string, index: number) => {
+    let ext: ExtensionConfig;
     // Shortcut where string is used for extension without any options.
-    if (typeof ext === 'string') {
-      ext = config[index] = {packagePath: ext};
-    }
+    if (typeof ext_ === 'string') ext = config[index] = {packagePath: ext_};
+    else ext = {...ext_};
     // The package.json key that defines the extension manifest
     const key = ext.key ? ext.key : 'archetypedExtension';
     // The extension is a package on the disk.  We need to load it.
