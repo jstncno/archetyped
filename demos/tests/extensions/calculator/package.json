@@ -3,8 +3,16 @@
   "version": "0.0.1",
   "main": "calculator.js",
   "private": true,
-  "archetypeExtension": {
+  "archetypedExtension": {
     "consumes": ["math"],
     "provides": ["calculator"]
+  },
+  "custom": {
+    "package": {
+      "key": {
+        "consumes": ["math"],
+        "provides": ["calculator"]
+      }
+    }
   }
 }

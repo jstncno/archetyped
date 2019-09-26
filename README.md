@@ -128,6 +128,10 @@ If the only option in the config is `packagePath`, then a string can be
 used in place of the object. If you want to pass other options to the
 plugin when it's being created, you can put arbitrary properties here.
 
+### Reserved configuration keys
+
+#### `trusted`
+
 If `trusted` is `false` or unspecified (default), the extension will be
 loaded inside a sandboxed [Node VM](https://nodejs.org/api/vm.html).
 If `trusted` is set to `true`, the extension will run in the context of
@@ -140,9 +144,45 @@ to `true` and can't just be something truthy:
 config.trusted === true
 ```
 
-The `extension` section in each extension's `package.json` is also merged
-in as a prototype to the main config. This is where `provides` and
-`consumes` properties are usually set.
+#### `key`
+
+The `archetypedExtension` property in each extension's `package.json`
+contains information about the `ExtensionManifest`. It will also be
+merged in as a prototype to the main config. This is where
+`provides` and `consumes` properties are usually set:
+
+```json
+// package.json
+{
+  ...
+  "archetypedExtension": {
+    "consumes": ['math'],
+    "provides": ['calculator']
+  }
+}
+```
+
+Alternatively, `Archetyped` will look for the `ExtensionManifest` if
+`key` is set in the `ExtensionConfig`:
+
+```typescript
+const appConfig: ArchetypedConfig = [
+  { packagePath: 'math', key: 'custom.property' },
+];
+```
+
+```json
+// package.json
+{
+  ...
+  "custom": {
+    "property": {
+      "consumes": ['math'],
+      "provides": ['calculator']
+    }
+  }
+}
+```
 
 ## `Archetyped` main API
 
