@@ -13,10 +13,11 @@ describe('Node VM', () => {
     basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
   });
 
-  it('should create an instance of Archetyped with a trusted extension' , () => {
-    const appConfig = resolveConfig([
-      {packagePath: 'trusted-extension', trusted: true},
-    ], basePath);
+  it('should create an instance of Archetyped with a trusted extension', () => {
+    const appConfig = resolveConfig(
+      [{ packagePath: 'trusted-extension', trusted: true }],
+      basePath
+    );
 
     createApp(appConfig, (err, app) => {
       expect(app).to.not.be.null;
@@ -25,10 +26,11 @@ describe('Node VM', () => {
     });
   });
 
-  it('should create an instance of Archetyped with an extension trusted at runtime' , () => {
-    const appConfig = resolveConfig([
-      {packagePath: 'trusted-extension', trusted: () => true},
-    ], basePath);
+  it('should create an instance of Archetyped with an extension trusted at runtime', () => {
+    const appConfig = resolveConfig(
+      [{ packagePath: 'trusted-extension', trusted: () => true }],
+      basePath
+    );
 
     createApp(appConfig, (err, app) => {
       expect(app).to.not.be.null;
@@ -37,19 +39,18 @@ describe('Node VM', () => {
     });
   });
 
-  it('should throw when we choose to not trust a trusted extension' , () => {
+  it('should throw when we choose to not trust a trusted extension', () => {
     expect(() => {
-      resolveConfig([
-        {packagePath: 'trusted-extension'},
-      ], basePath);
+      resolveConfig([{ packagePath: 'trusted-extension' }], basePath);
     }).throw(VMError);
   });
 
-  it('should throw when untrusted extension tries to acces "fs"' , () => {
+  it('should throw when untrusted extension tries to acces "fs"', () => {
     expect(() => {
-      resolveConfig([
-        {packagePath: './extensions/untrusted-extension'},
-      ], basePath);
+      resolveConfig(
+        [{ packagePath: './extensions/untrusted-extension' }],
+        basePath
+      );
     }).throw(VMError);
   });
 });

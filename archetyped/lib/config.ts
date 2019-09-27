@@ -2,7 +2,7 @@ import { ArchetypedExtension } from './extension';
 
 export interface ExtensionConfig {
   packagePath: string;
-  trusted?: boolean|Function;
+  trusted?: boolean | Function;
   key?: string;
   [key: string]: any;
 }

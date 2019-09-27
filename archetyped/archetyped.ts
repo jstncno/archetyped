@@ -1,8 +1,15 @@
 import { EventEmitter } from 'events';
 import { basename } from 'path';
-import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError, Service } from './lib';
-import { DependencyGraph, Dependency } from './utils/dependency-graph';
+
+import {
+  ArchetypedConfig,
+  ArchetypedExtension,
+  ExtendedError,
+  ExtensionConfig,
+  Service,
+} from './lib';
 import { ExtensionDefinition } from './lib/config';
+import { DependencyGraph } from './utils/dependency-graph';
 
 /**
  * A subclass of [[EventEmitter]] that dynamically loads
@@ -14,11 +21,10 @@ import { ExtensionDefinition } from './lib/config';
  * @event "error" Emitted when an error occurs
  */
 export default class Archetyped extends EventEmitter {
-
   /**
    * A mapping of extension names to the names of the services it provides.
    */
-  packages: {[name: string]: string[]} = {};
+  packages: { [name: string]: string[] } = {};
 
   /**
    * A mapping of provided services to the package it's contained in.
@@ -61,7 +67,9 @@ export default class Archetyped extends EventEmitter {
     this.sortedExtensions = this.checkConfig(this.config);
 
     // Give createApp some time to subscribe to our "ready" event
-    (typeof process === "object" ? process.nextTick : setTimeout)(this.loadExtensions.bind(this));
+    (typeof process === 'object' ? process.nextTick : setTimeout)(
+      this.loadExtensions.bind(this)
+    );
   }
 
   /**
@@ -88,7 +96,10 @@ export default class Archetyped extends EventEmitter {
    * @param config A list of [[ExtensionConfig]].
    * @param lookup A function to check if a services has been registered.
    */
-  private checkConfig(config: ArchetypedConfig, lookup?: Function): ExtensionDefinition[] {
+  private checkConfig(
+    config: ArchetypedConfig,
+    lookup?: Function
+  ): ExtensionDefinition[] {
     // Check for the required fields in each plugin.
     config.forEach((extension: ExtensionConfig) => {
       if (extension.checked) return;
@@ -112,7 +123,10 @@ export default class Archetyped extends EventEmitter {
    * @param config A list of [[ExtensionConfig]].
    * @param lookup A function to check if a services has been registered.
    */
-  private checkCycles(config: ArchetypedConfig, lookup?: Function): ExtensionDefinition[] {
+  private checkCycles(
+    config: ArchetypedConfig,
+    lookup?: Function
+  ): ExtensionDefinition[] {
     const graph = new DependencyGraph([...config]);
     const result = graph.resolve();
     if (result.error) {
@@ -123,7 +137,7 @@ export default class Archetyped extends EventEmitter {
     if (!sorted) {
       const err = 'Error resolving dependency graph';
       console.error(err);
-      this.emit('error', {extensions: [], error: err});
+      this.emit('error', { extensions: [], error: err });
       return [];
     }
     return sorted;
@@ -134,7 +148,7 @@ export default class Archetyped extends EventEmitter {
    */
   private loadExtensions() {
     this.sortedExtensions.forEach((config: ExtensionConfig) => {
-      const imports: {[name: string]: Service} = {};
+      const imports: { [name: string]: Service } = {};
 
       if (config.consumes) {
         config.consumes.forEach((service: string) => {
@@ -143,13 +157,14 @@ export default class Archetyped extends EventEmitter {
       }
 
       const extensionName = basename(config.packagePath);
-      if (!this.packages[extensionName])
-        this.packages[extensionName] = [];
+      if (!this.packages[extensionName]) this.packages[extensionName] = [];
 
       try {
         const extension = new config.class(config, imports);
         this.register(extensionName, extension);
-        this.appReadyExtensionCallbacks.push(extension.onAppReady.bind(extension));
+        this.appReadyExtensionCallbacks.push(
+          extension.onAppReady.bind(extension)
+        );
         this.destroyExtensionCallbacks.push(extension.destroy);
       } catch (err) {
         console.error(err);
@@ -174,7 +189,8 @@ export default class Archetyped extends EventEmitter {
         if (!provided[service]) {
           const debug = JSON.stringify(extension);
           const err = new ExtendedError(
-            `Plugin failed to provide ${name} service.\n${debug}`);
+            `Plugin failed to provide ${name} service.\n${debug}`
+          );
           err.extension = extension;
           return this.emit('error', err);
         }

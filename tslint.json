@@ -1,0 +1,23 @@
+{
+    "defaultSeverity": "error",
+    "extends": [],
+    "jsRules": {},
+    "rules": {
+      "max-line-length": {
+          "options": [80]
+      },
+      "no-var-keyword": true,
+      "ordered-imports": [
+        true,
+        {
+          "grouped-imports": true,
+          "import-sources-order": "case-insensitive",
+          "named-imports-order": "lowercase-first"
+        }
+      ],
+      "prefer-const": true,
+      "semicolon": "always",
+      "trailing-comma": "always"
+    },
+    "rulesDirectory": []
+}

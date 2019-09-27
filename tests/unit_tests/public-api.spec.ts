@@ -13,22 +13,22 @@ describe('Archetyped Public API', () => {
 
     before(() => {
       basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
-      appConfig = resolveConfig([
-        {packagePath: './extensions/calculator'},
-        {packagePath: 'math'},
-      ], basePath);
+      appConfig = resolveConfig(
+        [{ packagePath: './extensions/calculator' }, { packagePath: 'math' }],
+        basePath
+      );
       app = createApp(appConfig, () => {});
     });
 
-    it('should create an instance of Archetyped' , () => {
+    it('should create an instance of Archetyped', () => {
       expect(app).to.not.be.null;
       expect(app instanceof EventEmitter).to.be.true;
       expect(app instanceof Archetyped).to.be.true;
     });
 
-    it('should create and sort extension configs' , () => {
+    it('should create and sort extension configs', () => {
       expect(app!.extensions).to.be.not.empty;
-      const [ math, calculator ] = app!.extensions;
+      const [math, calculator] = app!.extensions;
       expect(basename(math.packagePath)).to.be.equal('math');
       expect(basename(calculator.packagePath)).to.be.equal('calculator');
     });
@@ -41,25 +41,28 @@ describe('Archetyped Public API', () => {
 
     before(() => {
       basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
-      appConfig = resolveConfig([
-        {
-          packagePath: './extensions/calculator',
-          key: 'custom.package.key',
-        },
-        {packagePath: 'math'},
-      ], basePath);
+      appConfig = resolveConfig(
+        [
+          {
+            packagePath: './extensions/calculator',
+            key: 'custom.package.key',
+          },
+          { packagePath: 'math' },
+        ],
+        basePath
+      );
       app = createApp(appConfig, () => {});
     });
 
-    it('should create an instance of Archetyped' , () => {
+    it('should create an instance of Archetyped', () => {
       expect(app).to.not.be.null;
       expect(app instanceof EventEmitter).to.be.true;
       expect(app instanceof Archetyped).to.be.true;
     });
 
-    it('should create and sort extension configs' , () => {
+    it('should create and sort extension configs', () => {
       expect(app!.extensions).to.be.not.empty;
-      const [ math, calculator ] = app!.extensions;
+      const [math, calculator] = app!.extensions;
       expect(basename(math.packagePath)).to.be.equal('math');
       expect(basename(calculator.packagePath)).to.be.equal('calculator');
     });
@@ -72,22 +75,22 @@ describe('Archetyped Public API', () => {
 
     before(() => {
       basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
-      appConfig = resolveConfig([
-        './extensions/calculator',
-        {packagePath: 'math'},
-      ], basePath);
+      appConfig = resolveConfig(
+        ['./extensions/calculator', { packagePath: 'math' }],
+        basePath
+      );
       app = createApp(appConfig, () => {});
     });
 
-    it('should create an instance of Archetyped' , () => {
+    it('should create an instance of Archetyped', () => {
       expect(app).to.not.be.null;
       expect(app instanceof EventEmitter).to.be.true;
       expect(app instanceof Archetyped).to.be.true;
     });
 
-    it('should create and sort extension configs' , () => {
+    it('should create and sort extension configs', () => {
       expect(app!.extensions).to.be.not.empty;
-      const [ math, calculator ] = app!.extensions;
+      const [math, calculator] = app!.extensions;
       expect(basename(math.packagePath)).to.be.equal('math');
       expect(basename(calculator.packagePath)).to.be.equal('calculator');
     });
