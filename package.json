@@ -9,12 +9,13 @@
   "scripts": {
     "build": "tsc",
     "test": "bin/run_tests.sh",
+    "test:lint": "prettier --check \"**/*.ts\" && tslint --project .",
     "build:http-demo": "DIR=`pwd` && cd demos/simple-web-server && npm install && cd $DIR && tsc -p demos/simple-web-server/tsconfig.json && copyfiles demos/simple-web-server/**/*.{json,html} demos/simple-web-server/build",
     "start:http-demo": "npm run build:http-demo && node demos/simple-web-server/build/demos/simple-web-server/server.js",
     "clean": "bin/clean.sh",
     "pack": "bin/pack.sh",
     "publish": "bin/publish.sh",
-    "lint": "tslint --fix --project . && prettier --write \"**/*.ts\""
+    "lint": "prettier --write \"**/*.ts\" && tslint --fix --project ."
   },
   "engines": {
     "node": ">=6.0.0"

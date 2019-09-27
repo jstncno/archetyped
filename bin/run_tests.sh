@@ -3,6 +3,9 @@
 # Exit when any command fails
 set -e
 
+# Run linter
+npm run test:lint
+
 # Clean and build new project
 npm run clean
 npm run build
