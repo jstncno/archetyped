@@ -152,6 +152,7 @@ export default class Archetyped extends EventEmitter {
         this.appReadyExtensionCallbacks.push(extension.onAppReady.bind(extension));
         this.destroyExtensionCallbacks.push(extension.destroy);
       } catch (err) {
+        console.error(err);
         err.extension = config;
         this.emit('error', err);
       }

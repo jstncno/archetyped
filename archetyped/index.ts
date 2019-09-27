@@ -120,6 +120,7 @@ function resolveModuleSync(base: string, modulePath: string, key: string = 'arch
   let manifest = (packagePath && require(packagePath)) || {};
   for (const k of key.split('.')) {
     if (!manifest[k]) {
+      console.warn(`Extension manifest could not be found at "${key}"`);
       manifest = {};
       break;
     }
