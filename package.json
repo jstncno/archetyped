@@ -9,11 +9,13 @@
   "scripts": {
     "build": "tsc",
     "test": "bin/run_tests.sh",
+    "test:lint": "prettier --check \"**/*.ts\" && tslint --project .",
     "build:http-demo": "DIR=`pwd` && cd demos/simple-web-server && npm install && cd $DIR && tsc -p demos/simple-web-server/tsconfig.json && copyfiles demos/simple-web-server/**/*.{json,html} demos/simple-web-server/build",
     "start:http-demo": "npm run build:http-demo && node demos/simple-web-server/build/demos/simple-web-server/server.js",
     "clean": "bin/clean.sh",
     "pack": "bin/pack.sh",
-    "publish": "bin/publish.sh"
+    "publish": "bin/publish.sh",
+    "lint": "prettier --write \"**/*.ts\" && tslint --fix --project ."
   },
   "engines": {
     "node": ">=6.0.0"
@@ -28,15 +30,18 @@
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/expect": "^1.20.4",
+    "@types/express": "^4.17.1",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.6.8",
-    "@types/express": "^4.17.1",
     "chai": "^4.2.0",
+    "codelyzer": "^5.1.2",
     "copyfiles": "^2.1.1",
     "mocha": "^6.1.4",
+    "prettier": "^1.18.2",
     "ts-node": "^8.3.0",
     "tsconfig-paths": "^3.8.0",
     "tslib": "^1.10.0",
+    "tslint": "^5.20.0",
     "typescript": "^3.5.3"
   },
   "optionalDependencies": {},

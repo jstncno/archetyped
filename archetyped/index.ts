@@ -1,10 +1,15 @@
-import { dirname, join, resolve } from 'path';
 import { existsSync, realpathSync } from 'fs';
+import { dirname, join, resolve } from 'path';
 import { NodeVM } from 'vm2';
-import Archetyped from './archetyped';
-import { ArchetypedConfig, ArchetypedExtension, ExtensionConfig, ExtendedError } from './lib';
-import { ExtensionModuleDefinition, ExtensionManifest } from './lib/config';
 
+import Archetyped from './archetyped';
+import {
+  ArchetypedConfig,
+  ArchetypedExtension,
+  ExtendedError,
+  ExtensionConfig,
+} from './lib';
+import { ExtensionModuleDefinition } from './lib/config';
 
 /**
  * Returns an event emitter that represents the app.
@@ -13,8 +18,10 @@ import { ExtensionModuleDefinition, ExtensionManifest } from './lib/config';
  *   ready or has thrown an error.
  * @returns An instance of `Archetyped`
  */
-export function createApp(config: ArchetypedConfig, callback?: (err?: Error, app?: Archetyped) => void): Archetyped | null {
-
+export function createApp(
+  config: ArchetypedConfig,
+  callback?: (err?: Error, app?: Archetyped) => void
+): Archetyped | null {
   let app: Archetyped | null = null;
 
   const onReady = (app: Archetyped) => {
@@ -50,25 +57,31 @@ export function createApp(config: ArchetypedConfig, callback?: (err?: Error, app
  * @returns An instance of [[ArchetypedConfig]] that contains module data
  *   of [[ArchetypedExtension]]s.
  */
-export function resolveConfig(config: (ExtensionConfig|string)[], base?: string): ArchetypedConfig {
+export function resolveConfig(
+  config: (ExtensionConfig | string)[],
+  base?: string
+): ArchetypedConfig {
   const basePath = base ? base : __dirname;
-  return config.map((ext_: ExtensionConfig|string, index: number) => {
+  return config.map((ext_: ExtensionConfig | string, index: number) => {
     let ext: ExtensionConfig;
     // Shortcut where string is used for extension without any options.
-    if (typeof ext_ === 'string') ext = config[index] = {packagePath: ext_};
-    else ext = {...ext_};
+    if (typeof ext_ === 'string') ext = config[index] = { packagePath: ext_ };
+    else ext = { ...ext_ };
     // The package.json key that defines the extension manifest
     const key = ext.key ? ext.key : 'archetypedExtension';
     // The extension is a package on the disk.  We need to load it.
     const modDef: ExtensionModuleDefinition = resolveModuleSync(
-      basePath, ext.packagePath, key);
+      basePath,
+      ext.packagePath,
+      key
+    );
     // Allow default extension configs in the manifest
     Object.keys(modDef).forEach((key: string) => {
       if (!ext[key]) ext[key] = modDef[key] as any;
     });
 
-    const {resolvedPath} = modDef;
-    let {trusted} = ext;
+    const { resolvedPath } = modDef;
+    let { trusted } = ext;
     if (typeof ext.trusted === 'function' && ext.trusted.call) {
       trusted = ext.trusted();
     }
@@ -86,7 +99,7 @@ export function resolveConfig(config: (ExtensionConfig|string)[], base?: string)
           context: 'sandbox',
           external: true,
           builtin: ['path'],
-        }
+        },
       });
       cls = vm.require(resolvedPath).default;
     }
@@ -107,12 +120,15 @@ export function resolveConfig(config: (ExtensionConfig|string)[], base?: string)
  * Loads a module, getting metadata from either it's package.json or export
  * object.
  */
-function resolveModuleSync(base: string, modulePath: string, key: string = 'archetypedExtension'): ExtensionModuleDefinition {
+function resolveModuleSync(
+  base: string,
+  modulePath: string,
+  key: string = 'archetypedExtension'
+): ExtensionModuleDefinition {
   let packagePath;
   try {
     packagePath = resolvePackageSync(base, `${modulePath}/package.json`);
-  }
-  catch (err) {
+  } catch (err) {
     console.error('ResolvePackage error');
     if (err.code !== 'ENOENT') throw err;
   }
@@ -152,7 +168,7 @@ function resolveModuleSync(base: string, modulePath: string, key: string = 'arch
 }
 
 /** A cache of loaded package modules. */
-const packagePathCache: {[packagePath: string]: any} = {};
+const packagePathCache: { [packagePath: string]: any } = {};
 
 /**
  * Node style package resolving so that plugins' package.json can be found
@@ -173,7 +189,8 @@ function resolvePackageSync(base: string, packagePath: string): string {
     return cache[packagePath];
   }
   const err: ExtendedError = new Error(
-    `Can't find "${packagePath}" relative to "${originalBase}"`);
+    `Can't find "${packagePath}" relative to "${originalBase}"`
+  );
   err.code = 'ENOENT';
   let newPath;
   if (packagePath.startsWith('./') || packagePath.startsWith('/')) {
@@ -188,8 +205,7 @@ function resolvePackageSync(base: string, packagePath: string): string {
       cache[packagePath] = newPath;
       return newPath;
     }
-  }
-  else {
+  } else {
     // Check if package is installed in `node_modules` relative to `base`.
     while (base) {
       newPath = resolve(base, 'node_modules', packagePath);

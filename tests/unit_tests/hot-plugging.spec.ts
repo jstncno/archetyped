@@ -11,9 +11,7 @@ describe('Archetyped Hot Plugging', () => {
 
   before(() => {
     basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
-    appConfig = resolveConfig([
-      {packagePath: 'math'},
-    ], basePath);
+    appConfig = resolveConfig([{ packagePath: 'math' }], basePath);
   });
 
   it('should create an instance of Archetyped', () => {
@@ -31,9 +29,10 @@ describe('Archetyped Hot Plugging', () => {
       expect(math).to.be.ok;
       app!.removeAllListeners();
 
-      const newConfig = resolveConfig([
-        {packagePath: './extensions/calculator'},
-      ], basePath);
+      const newConfig = resolveConfig(
+        [{ packagePath: './extensions/calculator' }],
+        basePath
+      );
       app!.on('ready', () => {
         const calculator = app!.services.calculator;
         expect(calculator).to.be.ok;
@@ -42,18 +41,19 @@ describe('Archetyped Hot Plugging', () => {
     });
   });
 
-  it('should not load an extension if its dependencies aren\'t met', () => {
+  it("should not load an extension if its dependencies aren't met", () => {
     const app = createApp([]);
     app!.on('ready', () => {
       app!.removeAllListeners();
 
-      app!.on('error', (event: {error?: string, [key: string]: any}) => {
+      app!.on('error', (event: { error?: string; [key: string]: any }) => {
         expect(event.extensions.length).to.equal(0);
       });
 
-      const newConfig = resolveConfig([
-        {packagePath: './extensions/calculator'},
-      ], basePath);
+      const newConfig = resolveConfig(
+        [{ packagePath: './extensions/calculator' }],
+        basePath
+      );
       app!.on('ready', () => {
         const calculator = app!.services.calculator;
         expect(calculator).to.be.undefined;
@@ -62,5 +62,4 @@ describe('Archetyped Hot Plugging', () => {
       app!.load(newConfig);
     });
   });
-
 });

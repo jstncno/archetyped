@@ -2,11 +2,10 @@ import { ExtensionConfig } from './config';
 import { Service, ServicesColection } from './service';
 
 export class ArchetypedExtension {
-
   /**
    * A mapping of provided services names to its functionality.
    */
-  private services: ServicesColection = {}
+  private services: ServicesColection = {};
 
   constructor(readonly config: ExtensionConfig, readonly imports: any) {}
 

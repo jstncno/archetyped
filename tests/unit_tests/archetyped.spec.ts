@@ -11,10 +11,10 @@ describe('Archetyped', () => {
 
   before(() => {
     basePath = resolve(dirname(__dirname), 'build', 'demos', 'tests');
-    appConfig = resolveConfig([
-      {packagePath: './extensions/calculator'},
-      {packagePath: 'math'},
-    ], basePath);
+    appConfig = resolveConfig(
+      [{ packagePath: './extensions/calculator' }, { packagePath: 'math' }],
+      basePath
+    );
   });
 
   it('should call callback', () => {
@@ -37,18 +37,27 @@ describe('Archetyped', () => {
 
   it('should emit event whenever extensions are registered', () => {
     const app = createApp(appConfig);
-    app!.on('extension', (extension) => {
-      const instanceName = extension.config.class.name
+    app!.on('extension', extension => {
+      const instanceName = extension.config.class.name;
       switch (instanceName) {
         case 'Math':
           expect(extension.add(2, 2)).to.be.equal(4);
           break;
         case 'Calculator':
-          const eight = extension.start(3).add(5).equals();
+          const eight = extension
+            .start(3)
+            .add(5)
+            .equals();
           expect(eight).to.be.equal(8);
-          const sixteen = extension.start(eight).mult(2).equals();
+          const sixteen = extension
+            .start(eight)
+            .mult(2)
+            .equals();
           expect(sixteen).to.be.equal(16);
-          const four = extension.start(sixteen).div(4).equals();
+          const four = extension
+            .start(sixteen)
+            .div(4)
+            .equals();
           expect(four).to.be.equal(4);
           break;
         default:
@@ -58,9 +67,10 @@ describe('Archetyped', () => {
   });
 
   it('should raise error for failed dependecy resolution', () => {
-    const config = resolveConfig([
-      {packagePath: './extensions/calculator'},
-    ], basePath);
+    const config = resolveConfig(
+      [{ packagePath: './extensions/calculator' }],
+      basePath
+    );
     const app = createApp(config, (err, app?) => {
       expect(err).to.not.be.undefined;
       expect(app).to.not.be.ok;

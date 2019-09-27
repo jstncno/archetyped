@@ -1,12 +1,13 @@
-
 import express from 'express';
 import * as core from 'express-serve-static-core';
 import * as bodyParser from 'body-parser';
 import * as path from 'path';
-import { ArchetypedExtension, ExtensionConfig } from '../../../../archetyped/lib';
+import {
+  ArchetypedExtension,
+  ExtensionConfig,
+} from '../../../../archetyped/lib';
 
 export default class Http extends ArchetypedExtension {
-
   private readonly app: core.Express;
   private readonly host: string;
   private readonly port: number;
