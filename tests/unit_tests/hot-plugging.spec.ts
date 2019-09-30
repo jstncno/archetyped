@@ -34,7 +34,9 @@ describe('Archetyped Hot Plugging', () => {
         basePath
       );
       app!.on('ready', () => {
+        const math2 = app!.services.math;
         const calculator = app!.services.calculator;
+        expect(math).to.equal(math2);
         expect(calculator).to.be.ok;
       });
       app!.load(newConfig);

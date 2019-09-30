@@ -5,4 +5,4 @@ export interface Service {
 /**
  * A map of [[Service]]s by their name.
  */
-export type ServicesColection = { [name: string]: Service };
+export type ServicesCollection = { [name: string]: Service };

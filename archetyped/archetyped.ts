@@ -41,14 +41,15 @@ export default class Archetyped extends EventEmitter {
   };
 
   /**
+   * A cached of instantiated extensions. Each loaded extension
+   * is a singleton instance.
+   */
+  private cachedExtensions: { [name: string]: ArchetypedExtension } = {};
+
+  /**
    * A list of provided extension `destroy` methods.
    */
   private destroyExtensionCallbacks: Function[] = [];
-
-  /**
-   * A list of provided extension `onAppReady` methods.
-   */
-  private appReadyExtensionCallbacks: Function[] = [];
 
   /**
    * A list of [[ArchetypeExtension]] configurations, sorted by dependencies.
@@ -147,7 +148,11 @@ export default class Archetyped extends EventEmitter {
    * Loads each extension by instantiating and registering them.
    */
   private loadExtensions() {
+    const appReadyExtensionCallbacks: Function[] = [];
     this.sortedExtensions.forEach((config: ExtensionConfig) => {
+      const cached = this.cachedExtensions[config.class];
+      if (cached) return;
+
       const imports: { [name: string]: Service } = {};
 
       if (config.consumes) {
@@ -161,10 +166,9 @@ export default class Archetyped extends EventEmitter {
 
       try {
         const extension = new config.class(config, imports);
+        this.cachedExtensions[config.class] = extension;
         this.register(extensionName, extension);
-        this.appReadyExtensionCallbacks.push(
-          extension.onAppReady.bind(extension)
-        );
+        appReadyExtensionCallbacks.push(extension.onAppReady.bind(extension));
         this.destroyExtensionCallbacks.push(extension.destroy);
       } catch (err) {
         console.error(err);
@@ -174,7 +178,7 @@ export default class Archetyped extends EventEmitter {
     });
 
     this.emit('ready', this);
-    this.appReadyExtensionCallbacks.forEach((callback: Function) => {
+    appReadyExtensionCallbacks.forEach((callback: Function) => {
       callback();
     });
   }

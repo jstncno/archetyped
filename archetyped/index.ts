@@ -11,6 +11,8 @@ import {
 } from './lib';
 import { ExtensionModuleDefinition } from './lib/config';
 
+export { Archetyped };
+
 /**
  * Returns an event emitter that represents the app.
  * @param config A list of [[ArchetypedExtension]] configurations.
