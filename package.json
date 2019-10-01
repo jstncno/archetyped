@@ -1,7 +1,7 @@
 {
   "name": "archetyped",
   "description": "A Typescript implementation of Architect: A Simple yet powerful plugin system for node applications",
-  "version": "0.0.4-beta",
+  "version": "0.0.5-beta",
   "author": "earthican",
   "contributors": [],
   "main": "dist/index.js",
@@ -14,7 +14,7 @@
     "start:http-demo": "npm run build:http-demo && node demos/simple-web-server/build/demos/simple-web-server/server.js",
     "clean": "bin/clean.sh",
     "pack": "bin/pack.sh",
-    "publish": "bin/publish.sh",
+    "pub": "bin/publish.sh",
     "lint": "prettier --write \"**/*.ts\" && tslint --fix --project ."
   },
   "engines": {
